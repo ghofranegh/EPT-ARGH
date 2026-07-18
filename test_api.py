@@ -1,7 +1,7 @@
 from PIL import Image
 from utils.api import predict
 
-img = Image.open("path/to/any/test/image.png")
+img = Image.open(r"E:\ept ragh\streamlit_app\001.bmp")
 result = predict(img)
 print("predicted_class:", result["predicted_class"])
 print("confidence:", result["confidence"])

@@ -106,6 +106,8 @@ def predict(image: Image.Image) -> dict:
             input_resolutions=[{"units": "baseline", "resolution": 1.0}], auto_get_mask=False, overwrite=True,
         )
         inst_dict = read_tiatoolbox_zarr(result[img_path])
+        print(f"[predict] segmentation terminee : {len(inst_dict)} noyaux detectes")
+
 
     inst_map = np.zeros(image_rgb.shape[:2], dtype=np.int32)
     crops, centroids, nucleus_ids = [], [], []
@@ -129,9 +131,11 @@ def predict(image: Image.Image) -> dict:
                                   "cytoplasm": background_mask_img, "nucleus": nucleus_mask_img},
                 "gradcam": {"heatmap": image.copy(), "overlay": image.copy()}, "regions_of_interest": []}
 
+    print(f"[predict] {len(crops)} crops extraits, debut de l'echantillonnage Laplace (30 passes)...")
     batch = torch.stack([_TRANSFORM(Image.fromarray(c)) for c in crops]).to(DEVICE)
     with torch.no_grad():
         samples = _laplace.predictive_samples(batch, n_samples=30)
+    print("[predict] echantillonnage Laplace termine")
     mu, sigma = samples.mean(dim=0).cpu().numpy(), samples.std(dim=0).cpu().numpy()
 
     features = torch.tensor(np.concatenate([mu, sigma], axis=1), dtype=torch.float32).to(DEVICE)
@@ -155,6 +159,7 @@ def predict(image: Image.Image) -> dict:
     target_layer = dict(_backbone.named_modules())[CFG["gradcam_target_layer"]]
     crop_tensor = _TRANSFORM(Image.fromarray(crops[top_i])).unsqueeze(0).to(DEVICE)
     with GradCAM(model=_backbone, target_layers=[target_layer]) as cam:
+        print("[predict] calcul du Grad-CAM...")
         grayscale_cam = cam(input_tensor=crop_tensor, targets=[ClassifierOutputTarget(int(mu[top_i].argmax()))])[0]
     crop_float = cv2.resize(crops[top_i], (IMAGE_SIZE, IMAGE_SIZE)).astype(np.float32) / 255.0
     gradcam_overlay = show_cam_on_image(crop_float, grayscale_cam, use_rgb=True, image_weight=0.65)

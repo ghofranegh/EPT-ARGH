@@ -7,9 +7,9 @@ LOGO_PATH = os.path.join(os.path.dirname(__file__), "..", "assets", "logo.png")
 
 NAV_ITEMS = [
     {"icon": "🏠", "label": "Dashboard", "page": "app.py"},
-    {"icon": "🧬", "label": "Image Analysis", "page": "pages/2_🧬_Image_Analysis.py"},
-    {"icon": "📈", "label": "Model Performance", "page": "pages/3_📈_Model_Performance.py"},
-    {"icon": "ℹ️", "label": "About BFCS Agent", "page": "pages/4_ℹ️_About.py"},
+    {"icon": "🧬", "label": "Image Analysis", "page": "pages/Image_Analysis.py"},
+    {"icon": "📈", "label": "Model Performance", "page": "pages/Model_Performance.py"},
+    {"icon": "ℹ️", "label": "About BFCS Agent", "page": "pages/About.py"},
 ]
 
 
